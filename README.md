@@ -49,7 +49,7 @@ For each address parsed, **successful** responses will have the the form:
     "parking": "string",
     "room": "string",
     "input_string": "string",
-    "number_of_results": "int",
+    "number_of_results": "int, number of results returned by the Geocoding API given the input string (only the first result is represented in the successful response)",
     "status": "string"
 }
 ```
