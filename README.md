@@ -1,4 +1,5 @@
 # Python Batch Address Geocoder
+Geocode a list of string addresses to get their coordinates and other geospatial information using the Google Geocoding API.
 
 ## Usage
 To run [geocode.py](geocode.py), insert your Google API key and list of addresses you'd like to geocode. Optionally, set a country restriction you'd like to limit your addresses to, or set a language output. Leave country restriction and language output as *None* if you don't want to set any component restrictions.
@@ -12,7 +13,7 @@ For each address parsed, **successful** responses will have the the form:
 ```json
 {   
     "place_id" : "string",
-    "formatted_address" : "string",
+    "formatted_address" : "string, Google formatted address of the input string",
     "type": "string",
     "partial_match": "string",
     "latitude": "float",
