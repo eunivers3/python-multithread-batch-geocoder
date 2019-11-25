@@ -53,5 +53,5 @@ For each address parsed, **successful** responses will have the the form:
 }
 ```
 
-See the Google geocoding [guide] (https://developers.google.com/maps/documentation/geocoding/intro) for detailed descriptions of each key field.
+See the Google geocoding [guide](https://developers.google.com/maps/documentation/geocoding/intro) for detailed descriptions of each key field.
 
