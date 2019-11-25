@@ -73,7 +73,7 @@ class Geocoder:
                 if key in x.get('types')])
             return results
         
-        # Ping google for the results:
+        # Ping google for the results
         results = requests.get(geocode_url)
         results = results.json()
         # if there's results, flatten them
@@ -122,19 +122,43 @@ class Geocoder:
             self.__output['status'] = results.get('status')
         return self.__output
 
+def save_results(results_arr, output='json'):
+    """
+    Saves results list as results.json or results.csv, default output is json file
+    """
+    import json
+    if output == "json":
+        with open("results.json", 'w') as outfile:
+            print ("Saving results to {}".format("results.json"))
+            json.dump(results_arr, outfile)
+    elif output == "csv":
+        import pandas as pd
+        result_df = pd.read_json(json.dumps(results_arr), orient='records')
+        print ("Saving results to {}".format("results.csv"))
+        result_df.to_csv("results.csv",index=False)
+
+
 #------------------ PROCESSING -----------------------------
 if __name__ == "__main__":
-    #TODO Developer: Set arguments
-    # api_key = "set google api key here"
-    # country_restriction = "choose alpha-2 country code; https://en.wikipedia.org/wiki/ISO_3166-1" 
-    # language_output = "OPTIONAL code of language in which to return results; https://developers.google.com/maps/faq#languagesupport"
-    # address = "location of asset"
-    geocoder = Geocoder(
-        api_key, 
-        country_restriction,
-        language_output,
-        address
-    )
-    results = geocoder.geocode()
+    # TODO Developer: Set arguments
+    api_key = 'SET_YOUR_GOOGLE_API_KEY_HERE' 
+    # alpha-2 country code; https://en.wikipedia.org/wiki/ISO_3166-1 e.g.
+    country_restriction = 'UK'
+    # OPTIONAL; language code in which to return results; https://developers.google.com/maps/faq#languagesupport
+    language_output = None
+    # list of locations e.g.
+    addresses = [
+        "the gherkin, london", 
+        "nw6 2lh"
+    ]
+    results = list()
+    for address in addresses:
+        output = Geocoder(
+            api_key, country_restriction, language_output, address
+        ).geocode()
+        results.append(output)
+        if len(results) % 100 == 0:
+            print ("Geocoded {} of {} address".format(len(results), len(addresses)))
+    # Save results here
+    save_results(results)
     print(json.dumps(results, indent=4))
-
