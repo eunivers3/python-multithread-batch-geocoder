@@ -1,5 +1,5 @@
 # Python Batch Address Geocoder
-Geocode a list of string addresses to get their coordinates and other geospatial information using the Google Geocoding API.
+Geocode a list of string addresses to get their GPS coordinates and other geospatial information using the Google Geocoding API.
 
 ## Usage
 To run [geocode.py](geocode.py), insert your Google API key and list of addresses you'd like to geocode. Optionally, set a country restriction you'd like to limit your addresses to, or set a language output. Leave country restriction and language output as *None* if you don't want to set any component restrictions.
