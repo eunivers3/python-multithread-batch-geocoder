@@ -144,7 +144,8 @@ if __name__ == "__main__":
     api_key = 'SET_YOUR_GOOGLE_API_KEY_HERE' 
     # alpha-2 country code; https://en.wikipedia.org/wiki/ISO_3166-1 e.g.
     country_restriction = 'UK'
-    # OPTIONAL; language code in which to return results; https://developers.google.com/maps/faq#languagesupport
+    # OPTIONAL; language code in which to return results; 
+    # https://developers.google.com/maps/faq#languagesupport e.g.
     language_output = None
     # list of locations e.g.
     addresses = [
