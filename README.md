@@ -15,8 +15,8 @@ For each address parsed, **successful** responses will have the the form:
     "formatted_address" : "string",
     "type": "string",
     "partial_match": "string",
-    "latitude": "string",
-    "longitude":"string",
+    "latitude": "float",
+    "longitude":"float",
     "viewport_northeast_lat": "string",
     "viewport_northeast_lng": "string",
     "viewport_southwest_lat": "string",
@@ -48,7 +48,7 @@ For each address parsed, **successful** responses will have the the form:
     "parking": "string",
     "room": "string",
     "input_string": "string",
-    "number_of_results": "string",
+    "number_of_results": "int",
     "status": "string"
 }
 ```
