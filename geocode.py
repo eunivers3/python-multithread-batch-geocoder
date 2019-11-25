@@ -137,8 +137,6 @@ def save_results(results_arr, output='json'):
         print ("Saving results to results.csv")
         result_df.to_csv("results.csv",index=False)
 
-
-
 if __name__ == "__main__":
     # TODO Developer: Set arguments
     api_key = 'SET_YOUR_GOOGLE_API_KEY_HERE' 
@@ -150,7 +148,8 @@ if __name__ == "__main__":
     # list of locations e.g.
     addresses = [
         "the gherkin, london", 
-        "nw6 2lh"
+        "nw6 2lh",
+        "183 Marsh Wall, London E14 9HR"
     ]
 
     #------------------ PROCESSING LOOP -----------------------------
