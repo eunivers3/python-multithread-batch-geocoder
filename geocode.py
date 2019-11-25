@@ -117,9 +117,9 @@ class Geocoder:
                 "parking": get_address_component(answer, "parking"),
                 "room": get_address_component(answer, "room")
             }    
-            self.__output['input_string'] = self.address
-            self.__output['number_of_results'] = len(results['results'])
-            self.__output['status'] = results.get('status')
+        self.__output['input_string'] = self.address
+        self.__output['number_of_results'] = len(results['results'])
+        self.__output['status'] = results.get('status')
         return self.__output
 
 def save_results(results_arr, output='json'):
@@ -129,16 +129,16 @@ def save_results(results_arr, output='json'):
     import json
     if output == "json":
         with open("results.json", 'w') as outfile:
-            print ("Saving results to {}".format("results.json"))
+            print ("Saving results to results.json")
             json.dump(results_arr, outfile)
     elif output == "csv":
         import pandas as pd
         result_df = pd.read_json(json.dumps(results_arr), orient='records')
-        print ("Saving results to {}".format("results.csv"))
+        print ("Saving results to results.csv")
         result_df.to_csv("results.csv",index=False)
 
 
-#------------------ PROCESSING -----------------------------
+
 if __name__ == "__main__":
     # TODO Developer: Set arguments
     api_key = 'SET_YOUR_GOOGLE_API_KEY_HERE' 
@@ -152,14 +152,18 @@ if __name__ == "__main__":
         "the gherkin, london", 
         "nw6 2lh"
     ]
+
+    #------------------ PROCESSING LOOP -----------------------------
     results = list()
     for address in addresses:
+        print("Geocoding: {}".format(address))
         output = Geocoder(
             api_key, country_restriction, language_output, address
         ).geocode()
         results.append(output)
         if len(results) % 100 == 0:
-            print ("Geocoded {} of {} address".format(len(results), len(addresses)))
+            print ("Geocoded {} of {} addresses".format(len(results), len(addresses)))
+    print("Finished geocoding all addresses!")
     # Save results here
     save_results(results)
-    print(json.dumps(results, indent=4))
+    # print(json.dumps(results, indent=4))
