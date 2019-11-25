@@ -163,6 +163,8 @@ if __name__ == "__main__":
         if len(results) % 100 == 0:
             print ("Geocoded {} of {} addresses".format(len(results), len(addresses)))
     print("Finished geocoding all addresses!")
-    # Save results here
+    # Save results as json
     save_results(results)
+    # Save results as csv
+    # save_results(results, output='csv') 
     # print(json.dumps(results, indent=4))

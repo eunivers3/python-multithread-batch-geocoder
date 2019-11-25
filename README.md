@@ -7,7 +7,7 @@ To run [geocode.py](geocode.py), insert your Google API key and list of addresse
 Execute the code with `python geocode.py`
 
 ## Results
-The list of results generated will be saved as a JSON file by default.
+The list of results generated will be saved as a JSON file by default. Option to save results as a csv too.
 
 For each address parsed, **successful** responses will have the the form:
 ```json
