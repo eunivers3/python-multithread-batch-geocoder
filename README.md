@@ -1,13 +1,31 @@
 # Python Batch Address Geocoder
-Geocode a list of string addresses to get their GPS coordinates and other geospatial information using the Google Geocoding API.
+Geocode a list of addresses to get their GPS coordinates and other geospatial information using the Google Geocoding API.
 
 ## Usage
-To run [geocode.py](geocode.py), insert your Google API key and list of addresses you'd like to geocode. Optionally, set a country restriction you'd like to limit your addresses to, or set a language output. Leave country restriction and language output as *None* if you don't want to set any component restrictions.
+To run [geocode.py](geocode.py), you will also need a .csv or .txt file containing a list of addresses you want to geocode.
 
-Execute the code with `python geocode.py`
+#### Synopsis
+`python geocode.py [GOOGLE_API_KEY] [FILEPATH] [SAVE] [--country=COUNTRY_RESTRICTION] [--lang=LANGUAGE_OUTPUT]`
+
+#### Positional Arguments
+**GOOGLE_API_KEY**
+Your google api key to enable the geocoding service.
+
+**FILEPATH**
+Path to file containing a list addresses. Each address *must* be separated by a new line.
+
+**SAVE**
+Set to "json" or "csv" for your desired output format.
+
+#### Optional Flags
+**--country=COUNTRY_RESTRICTION** 
+Set a country restriction; see alpha-2 country codes https://en.wikipedia.org/wiki/ISO_3166-1
+
+**--lang=LANGUAGE_OUTPUT** 
+Optional language code in which to return results; see https://developers.google.com/maps/faq#languagesupport
 
 ## Results
-The list of results generated will be saved as a JSON file by default. Option to save results as a csv too.
+The results generated will be saved as a JSON or CSV file.
 
 For each address parsed, **successful** responses will have the the form:
 ```json
