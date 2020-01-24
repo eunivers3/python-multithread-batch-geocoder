@@ -21,10 +21,10 @@ set to "json" or "csv" for your desired output format.
 
 #### Optional Flags
 `--country=COUNTRY_RESTRICTION`
-set a country restriction; see alpha-2 country codes https://en.wikipedia.org/wiki/ISO_3166-1
+set country restriction of addresses to an (alpha-2 country code)[https://en.wikipedia.org/wiki/ISO_3166-1]
 
 `--lang=LANGUAGE_OUTPUT `
-optional language code in which to return results; see https://developers.google.com/maps/faq#languagesupport
+optional (language code)[https://developers.google.com/maps/faq#languagesupport] in which to return results
 
 ## Results
 The results generated will be saved as a JSON or CSV file.
