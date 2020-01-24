@@ -10,20 +10,20 @@ To run [geocode.py](geocode.py), you will also need a .csv or .txt file containi
 e.g. `python geocode.py YOUR_KEY_HERE addr.csv json --country UK`
 
 ### Positional Arguments
-**GOOGLE_API_KEY**
+`GOOGLE_API_KEY`
 Your google api key to enable the geocoding service.
 
-**FILEPATH**
-Path to file containing a list addresses. Each address *must* be separated by a new line.
+`FILEPATH`
+Path to file containing a list of addresses. Each address *must* be separated by a new line.
 
-**SAVE**
+`SAVE`
 Set to "json" or "csv" for your desired output format.
 
 ### Optional Flags
-**--country=COUNTRY_RESTRICTION** 
+`--country=COUNTRY_RESTRICTION`
 Set a country restriction; see alpha-2 country codes https://en.wikipedia.org/wiki/ISO_3166-1
 
-**--lang=LANGUAGE_OUTPUT** 
+`--lang=LANGUAGE_OUTPUT `
 Optional language code in which to return results; see https://developers.google.com/maps/faq#languagesupport
 
 ## Results
