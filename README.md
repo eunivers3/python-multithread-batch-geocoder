@@ -4,10 +4,10 @@ Geocode a list of addresses to get their GPS coordinates and other geospatial in
 ## Usage
 To run [geocode.py](geocode.py), you will also need a .csv or .txt file containing a list of addresses you want to geocode.
 
-#### Synopsis
+### Synopsis
 `python geocode.py [GOOGLE_API_KEY] [FILEPATH] [SAVE] [--country=COUNTRY_RESTRICTION] [--lang=LANGUAGE_OUTPUT]`
 
-#### Positional Arguments
+### Positional Arguments
 **GOOGLE_API_KEY**
 Your google api key to enable the geocoding service.
 
@@ -17,7 +17,7 @@ Path to file containing a list addresses. Each address *must* be separated by a 
 **SAVE**
 Set to "json" or "csv" for your desired output format.
 
-#### Optional Flags
+### Optional Flags
 **--country=COUNTRY_RESTRICTION** 
 Set a country restriction; see alpha-2 country codes https://en.wikipedia.org/wiki/ISO_3166-1
 
