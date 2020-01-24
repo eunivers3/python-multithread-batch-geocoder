@@ -141,7 +141,7 @@ def save(results_arr, output='json'):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('key', help='set your google api key')
-    parser.add_argument('file', help='path to file containing list of new line separated addresses')
+    parser.add_argument('file', help='path to .csv or .txt file containing list of new line separated addresses')
     parser.add_argument('--country', help='set country restriction; see alpha-2 country codes https://en.wikipedia.org/wiki/ISO_3166-1')
     parser.add_argument('--lang', help='optional language code in which to return results; see https://developers.google.com/maps/faq#languagesupport')
     parser.add_argument('--csv', help='save as csv', type=bool)
