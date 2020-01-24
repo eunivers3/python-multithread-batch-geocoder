@@ -23,7 +23,7 @@ set to "json" or "csv" for your desired output format.
 `--country=COUNTRY_RESTRICTION`
 set country restriction of addresses to an [alpha-2 country code](https://en.wikipedia.org/wiki/ISO_3166-1)
 
-`--lang=LANGUAGE_OUTPUT `
+`--lang=LANGUAGE_OUTPUT`
 optional [language code](https://developers.google.com/maps/faq#languagesupport) in which to return results
 
 ## Results
