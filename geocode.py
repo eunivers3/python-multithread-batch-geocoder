@@ -1,4 +1,5 @@
 import requests
+import argparse
 import json
 from urllib.parse import quote_plus
 
@@ -122,7 +123,7 @@ class Geocoder:
         self.__output['status'] = results.get('status')
         return self.__output
 
-def save_results(results_arr, output='json'):
+def save(results_arr, output='json'):
     """
     Saves results list as results.json or results.csv, default output is json file
     """
@@ -138,33 +139,26 @@ def save_results(results_arr, output='json'):
         result_df.to_csv("results.csv",index=False)
 
 if __name__ == "__main__":
-    # TODO Developer: Set arguments
-    api_key = 'SET_YOUR_GOOGLE_API_KEY_HERE' 
-    # alpha-2 country code; https://en.wikipedia.org/wiki/ISO_3166-1 e.g.
-    country_restriction = 'UK'
-    # OPTIONAL; language code in which to return results; 
-    # https://developers.google.com/maps/faq#languagesupport e.g.
-    language_output = None
-    # list of locations e.g.
-    addresses = [
-        "the gherkin, london", 
-        "nw6 2lh",
-        "183 Marsh Wall, London E14 9HR"
-    ]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('key', help='set your google api key')
+    parser.add_argument('file', help='path to file containing list of new line separated addresses')
+    parser.add_argument('--country', help='set country restriction; see alpha-2 country codes https://en.wikipedia.org/wiki/ISO_3166-1')
+    parser.add_argument('--lang', help='optional language code in which to return results; see https://developers.google.com/maps/faq#languagesupport')
+    parser.add_argument('--csv', help='save as csv', type=bool)
+    args = parser.parse_args()
 
-    #------------------ PROCESSING LOOP -----------------------------
     results = list()
-    for address in addresses:
-        print("Geocoding: {}".format(address))
-        output = Geocoder(
-            api_key, country_restriction, language_output, address
-        ).geocode()
-        results.append(output)
-        if len(results) % 100 == 0:
-            print ("Geocoded {} of {} addresses".format(len(results), len(addresses)))
-    print("Finished geocoding all addresses!")
-    # Save results as json
-    save_results(results)
-    # Save results as csv
-    # save_results(results, output='csv') 
-    # print(json.dumps(results, indent=4))
+    with open(args.file) as f:
+        addresses = [ line.strip() for line in f ]
+        for address in addresses:
+            print("Geocoding: {}".format(address))
+            output = Geocoder(
+                args.key, args.country, args.lang, address
+            ).geocode()
+            results.append(output)
+            if len(results) % 100 == 0:
+                print ("Geocoded {} of {} addresses".format(len(results), len(addresses)))
+        print("Finished geocoding all addresses!")
+
+    if args.csv == True : save(results, output='csv') 
+    save(results) 
