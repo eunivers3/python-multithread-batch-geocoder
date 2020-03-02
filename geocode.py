@@ -4,63 +4,22 @@ import json
 from urllib.parse import quote_plus
 
 class Geocoder:
-    def __init__(self, api_key, country_restriction, language_output, address):
+    def __init__(self, api_key):
         self.api_key = api_key
-        self.country_restriction = country_restriction
-        self.language_output = language_output
-        self.address = address
-        self.__output = {
-            "place_id": None,
-            "formatted_address" : None,
-            "type": None,
-            "partial_match": None,
-            "latitude": None,
-            "longitude": None,
-            "viewport_northeast_lat": None,
-            "viewport_northeast_lng": None,
-            "viewport_southwest_lat": None,
-            "viewport_southwest_lng": None,
-            "accuracy": None,
-            "street_number": None,
-            "street_address": None,
-            "route": None,
-            "intersection": None,
-            "political": None,
-            "country": None,
-            "administrative_area_level_1": None,
-            "administrative_area_level_2": None,
-            "administrative_area_level_3": None,
-            "administrative_area_level_4": None,
-            "administrative_area_level_5": None,
-            "colloquial_area": None,
-            "locality": None,
-            "sublocality": None,
-            "neighborhood_name": None,
-            "premise": None,
-            "subpremise": None,
-            "postal_code": None,
-            "natural_feature": None,
-            "airport": None,
-            "park": None,
-            "point_of_interest": None,
-            "floor": None,
-            "parking" : None,
-            "room": None
-        }
-
-    def geocode(self):
-        address =  quote_plus(str(self.address))
+        
+    def geocode(self, country_restriction, language_output, address):
+        address =  quote_plus(str(address))
         base = "https://maps.googleapis.com/maps/api/geocode/json?address={}".format(address)
         key = "&key={}".format(self.api_key)        
-        set_country_restriction = "&components=country:{}".format(self.country_restriction)
-        set_language_output = "&language={}".format(self.language_output)
+        set_country_restriction = "&components=country:{}".format(country_restriction)
+        set_language_output = "&language={}".format(language_output)
 
         if self.api_key is not None:
-            if self.country_restriction is not None and self.language_output is not None:
+            if country_restriction is not None and language_output is not None:
                 geocode_url = base + key + set_country_restriction + set_language_output
-            elif self.country_restriction is not None:
+            elif country_restriction is not None:
                 geocode_url = base + key + set_country_restriction 
-            elif self.language_output is not None:
+            elif language_output is not None:
                 geocode_url = base + key + set_language_output
             else:
                 geocode_url = base + key
@@ -77,10 +36,11 @@ class Geocoder:
         # Ping google for the results
         results = requests.get(geocode_url)
         results = results.json()
+        output = dict()
         # if there's results, flatten them
         if len(results['results']) > 0:  
             answer = results['results'][0]
-            self.__output = {
+            output.update({
                 "place_id" : answer.get('place_id'),
                 "formatted_address" : answer.get('formatted_address'),
                 "type": ",".join(answer.get('types')), # list
@@ -117,11 +77,11 @@ class Geocoder:
                 "floor": get_address_component(answer, "floor"),
                 "parking": get_address_component(answer, "parking"),
                 "room": get_address_component(answer, "room")
-            }    
-        self.__output['input_string'] = self.address
-        self.__output['number_of_results'] = len(results['results'])
-        self.__output['status'] = results.get('status')
-        return self.__output
+            })
+        output['input_string'] = address
+        output['number_of_results'] = len(results['results'])
+        output['status'] = results.get('status')
+        return output
 
 def save(results_arr, output='json'):
     """
@@ -152,9 +112,7 @@ if __name__ == "__main__":
         addresses = [ line.strip() for line in f ]
         for address in addresses:
             print("Geocoding: {}".format(address))
-            output = Geocoder(
-                args.key, args.country, args.lang, address
-            ).geocode()
+            output = Geocoder(args.key).geocode(args.country, args.lang, address)
             results.append(output)
             if len(results) % 100 == 0:
                 print ("Geocoded {} of {} addresses".format(len(results), len(addresses)))
