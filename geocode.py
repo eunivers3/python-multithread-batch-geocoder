@@ -8,8 +8,8 @@ class Geocoder:
         self.api_key = api_key
         
     def geocode(self, country_restriction, language_output, address):
-        address =  quote_plus(str(address))
-        base = "https://maps.googleapis.com/maps/api/geocode/json?address={}".format(address)
+        address1 =  quote_plus(str(address))
+        base = "https://maps.googleapis.com/maps/api/geocode/json?address={}".format(address1)
         key = "&key={}".format(self.api_key)        
         set_country_restriction = "&components=country:{}".format(country_restriction)
         set_language_output = "&language={}".format(language_output)
@@ -91,7 +91,7 @@ def save(results_arr, output='json'):
     if output == "json":
         with open("results.json", 'w') as outfile:
             print ("Saving results to results.json")
-            json.dump(results_arr, outfile)
+            json.dump(results_arr, outfile, ensure_ascii=False)
     elif output == "csv":
         import pandas as pd
         result_df = pd.read_json(json.dumps(results_arr), orient='records')
