@@ -178,13 +178,10 @@ def GeocodeWrapper(addresses: list, country: str, language: str, api_key: str):
     start_time = time.time()
     with multiprocessing.pool.ThreadPool(POOL_SIZE) as executor:
         args = [(address, country, language) for address in addresses]
-        all_results = []
         results = executor.starmap(GeocoderService(api_key).geocode, args)
-        for response in results:
-            all_results.append(response)
-
     LOGGER.info("Finished in %s seconds", (time.time() - start_time))
-    return all_results
+
+    return results
 
 
 if __name__ == "__main__":
