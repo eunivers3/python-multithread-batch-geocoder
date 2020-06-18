@@ -1,21 +1,20 @@
 # Python Multithreaded Batch Address Geocoder
 Geocode a list of addresses in a .csv or .txt file to get their GPS coordinates and other geospatial information using the Google Geocoding API.
-Each address in the file *must* be separated by a new line.
+Each address in the input file *must* be separated by a new line.
 
 ### Prerequisites
-Python 3 or above
-Pythons pip
-
-### Requirements
-`$ pip install -r requirements.txt`
+* Python 3 or above
+* Pythons pip
 
 ### Usage
-To run [geocode.py](geocode.py), you will also need a .csv or .txt file containing a list of addresses you want to geocode.
-
-### Execution
-`python geocode.py [GOOGLE_API_KEY] [FILEPATH] [SAVE] [--country=COUNTRY_RESTRICTION] [--lang=LANGUAGE_OUTPUT]`
-
-e.g. `python geocode.py YOUR_KEY_HERE addr.csv json --country UK`
+To run [geocode.py](geocode.py), you will need a .csv or .txt file containing a list of addresses you want to geocode.
+1. **Clone the Repo**<br />
+`$ git clone git@github.com:eunicebjm/python-batch-geocoder.git`<br />
+2. **Requirements**<br />
+`$ pip install -r requirements.txt`<br />
+3. **Execute**<br />
+`$ python geocode.py [GOOGLE_API_KEY] [FILEPATH] [SAVE] [--country=COUNTRY_RESTRICTION] [--lang=LANGUAGE_OUTPUT]`
+e.g. **`python geocode.py <YOUR_KEY_HERE> addr.csv json --country UK`**
 
 #### Positional Arguments
 `[GOOGLE_API_KEY]`
