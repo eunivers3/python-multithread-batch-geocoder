@@ -1,122 +1,217 @@
 import requests
 import argparse
 import json
+import pandas as pd
+import multiprocessing
+import multiprocessing.pool
+import time
 from urllib.parse import quote_plus
+from ratelimit import limits, sleep_and_retry
+import logging
 
-class Geocoder:
+
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
+FORMATTER = logging.Formatter("%(asctime)s %(levelname)s: %(message)s")
+STREAM_HANDLER = logging.StreamHandler()
+STREAM_HANDLER.setFormatter(FORMATTER)
+LOGGER.addHandler(STREAM_HANDLER)
+
+ONE_SECOND = 1
+MAX_CALLS = 50
+POOL_SIZE = multiprocessing.cpu_count()
+
+
+class GeocoderService:
     def __init__(self, api_key):
         self.api_key = api_key
-        
-    def geocode(self, country_restriction, language_output, address):
-        address1 =  quote_plus(str(address))
-        base = "https://maps.googleapis.com/maps/api/geocode/json?address={}".format(address1)
-        key = "&key={}".format(self.api_key)        
-        set_country_restriction = "&components=country:{}".format(country_restriction)
-        set_language_output = "&language={}".format(language_output)
 
+    @staticmethod
+    def get_address_component(answer, key):
+        """
+            get info about specific address components from the google geocoder results
+            """
+        results = ",".join(
+            [
+                x["long_name"]
+                for x in answer.get("address_components")
+                if key in x.get("types")
+            ]
+        )
+        return results
+
+    @sleep_and_retry
+    @limits(calls=MAX_CALLS, period=ONE_SECOND)
+    def geocode(
+        self, address: str, country_restriction: str = None, language_output: str = None
+    ):
         if self.api_key is not None:
-            if country_restriction is not None and language_output is not None:
-                geocode_url = base + key + set_country_restriction + set_language_output
-            elif country_restriction is not None:
-                geocode_url = base + key + set_country_restriction 
-            elif language_output is not None:
-                geocode_url = base + key + set_language_output
+            reformatted_address = quote_plus(str(address).strip())
+            geocode_url = "https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={key}".format(
+                address=reformatted_address, key=self.api_key
+            )
+            if country_restriction and language_output:
+                geocode_url = "{base}{country}{language}".format(
+                    base=geocode_url,
+                    country="&components=country:{}".format(country_restriction),
+                    language="&language={}".format(language_output),
+                )
+            elif country_restriction:
+                geocode_url = "{base}{country}".format(
+                    base=geocode_url,
+                    country="&components=country:{}".format(country_restriction),
+                )
+            # Ping google for the results
+            results = requests.get(geocode_url)
+            results = results.json()
+            status = results.get("status")
+            output = dict()
+            # if there's results, flatten them
+            if len(results["results"]) > 0:
+                # return first result only if there's multiple
+                answer = results["results"][0]
+                output.update(
+                    {
+                        "requested_address": str(address),
+                        "place_id": answer.get("place_id"),
+                        "formatted_address": answer.get("formatted_address"),
+                        "type": ",".join(answer.get("types")),  # list
+                        "partial_match": True if answer.get("partial_match") else False,
+                        "location_type": answer.get("geometry").get("location_type"),
+                        "latitude": answer.get("geometry").get("location").get("lat"),
+                        "longitude": answer.get("geometry").get("location").get("lng"),
+                        "street_number": GeocoderService.get_address_component(
+                            answer, "street_number"
+                        ),
+                        "street_address": GeocoderService.get_address_component(
+                            answer, "street_address"
+                        ),
+                        "route": GeocoderService.get_address_component(answer, "route"),
+                        "intersection": GeocoderService.get_address_component(
+                            answer, "intersection"
+                        ),
+                        "political": GeocoderService.get_address_component(
+                            answer, "political"
+                        ),
+                        "country": ",".join(
+                            [
+                                x["short_name"]
+                                for x in answer.get("address_components")
+                                if "country" in x.get("types")
+                            ]
+                        ),
+                        "administrative_area_level_1": GeocoderService.get_address_component(
+                            answer, "administrative_area_level_1"
+                        ),
+                        "administrative_area_level_2": GeocoderService.get_address_component(
+                            answer, "administrative_area_level_2"
+                        ),
+                        "administrative_area_level_3": GeocoderService.get_address_component(
+                            answer, "administrative_area_level_3"
+                        ),
+                        "administrative_area_level_4": GeocoderService.get_address_component(
+                            answer, "administrative_area_level_4"
+                        ),
+                        "administrative_area_level_5": GeocoderService.get_address_component(
+                            answer, "administrative_area_level_5"
+                        ),
+                        "colloquial_area": GeocoderService.get_address_component(
+                            answer, "colloquial_area"
+                        ),
+                        "locality": GeocoderService.get_address_component(
+                            answer, "locality"
+                        ),
+                        "sublocality": GeocoderService.get_address_component(
+                            answer, "sublocality"
+                        ),
+                        "neighborhood": GeocoderService.get_address_component(
+                            answer, "neighborhood"
+                        ),
+                        "premise": GeocoderService.get_address_component(
+                            answer, "premise"
+                        ),
+                        "subpremise": GeocoderService.get_address_component(
+                            answer, "subpremise"
+                        ),
+                        "postal_code": GeocoderService.get_address_component(
+                            answer, "postal_code"
+                        ),
+                        "floor": GeocoderService.get_address_component(answer, "floor"),
+                        "parking": GeocoderService.get_address_component(
+                            answer, "parking"
+                        ),
+                        "room": GeocoderService.get_address_component(answer, "room"),
+                    }
+                )
+                LOGGER.info("%s: %s", status, address)
             else:
-                geocode_url = base + key
+                LOGGER.warning("%s: %s", status, address)
+        else:
+            LOGGER.error("Missing API key")
 
-        def get_address_component(answer, key):
-            """
-            get info about specific address components from the 
-            google geocoder results
-            """
-            results = ",".join([x['long_name'] for x in answer.get('address_components') 
-                if key in x.get('types')])
-            return results
-        
-        # Ping google for the results
-        results = requests.get(geocode_url)
-        results = results.json()
-        output = dict()
-        # if there's results, flatten them
-        if len(results['results']) > 0:  
-            answer = results['results'][0]
-            output.update({
-                "place_id" : answer.get('place_id'),
-                "formatted_address" : answer.get('formatted_address'),
-                "type": ",".join(answer.get('types')), # list
-                "partial_match": answer.get('partial_match'),
-                "latitude": answer.get('geometry').get('location').get('lat'),
-                "longitude": answer.get('geometry').get('location').get('lng'),
-                "viewport_northeast_lat": answer.get('geometry').get('viewport').get('northeast').get('lat'),
-                "viewport_northeast_lng": answer.get('geometry').get('viewport').get('northeast').get('lng'),
-                "viewport_southwest_lat": answer.get('geometry').get('viewport').get('southwest').get('lat'),
-                "viewport_southwest_lng": answer.get('geometry').get('viewport').get('southwest').get('lng'),
-                "accuracy": answer.get('geometry').get('location_type'),
-                "street_number": get_address_component(answer, "street_number"),
-                "street_address": get_address_component(answer, "street_address"),
-                "route": get_address_component(answer, "route"),
-                "intersection": get_address_component(answer, "intersection"),
-                "political": get_address_component(answer, "political"),
-                "country": get_address_component(answer, "country"),
-                "administrative_area_level_1": get_address_component(answer, "administrative_area_level_1"),
-                "administrative_area_level_2": get_address_component(answer, "administrative_area_level_2"),
-                "administrative_area_level_3": get_address_component(answer, "administrative_area_level_3"),
-                "administrative_area_level_4": get_address_component(answer, "administrative_area_level_4"),
-                "administrative_area_level_5": get_address_component(answer, "administrative_area_level_5"),
-                "colloquial_area": get_address_component(answer, "colloquial_area"),
-                "locality": get_address_component(answer, "locality"),
-                "sublocality": get_address_component(answer, "sublocality"),
-                "neighborhood_name": get_address_component(answer, "neighborhood"),
-                "premise": get_address_component(answer, "premise"),
-                "subpremise": get_address_component(answer, "subpremise"),
-                "postal_code": get_address_component(answer, "postal_code"),
-                "natural_feature": get_address_component(answer, "natural_feature"),
-                "airport": get_address_component(answer, "airport"),
-                "park": get_address_component(answer, "park"),
-                "point_of_interest": get_address_component(answer, "point_of_interest"),
-                "floor": get_address_component(answer, "floor"),
-                "parking": get_address_component(answer, "parking"),
-                "room": get_address_component(answer, "room")
-            })
-        output['input_string'] = address
-        output['number_of_results'] = len(results['results'])
-        output['status'] = results.get('status')
+        output["status"] = status
+        output["number_of_results"] = len(results["results"])
         return output
 
-def save(results_arr, output='json'):
+
+def save(results_arr, output="json"):
     """
     Saves results list as results.json or results.csv, default output is json file
     """
-    import json
     if output == "json":
-        with open("results.json", 'w') as outfile:
-            print ("Saving results to results.json")
+        with open("results.json", "w") as outfile:
+            LOGGER.info("Saving results to results.json")
             json.dump(results_arr, outfile, ensure_ascii=False)
     elif output == "csv":
-        import pandas as pd
-        result_df = pd.read_json(json.dumps(results_arr), orient='records')
-        print ("Saving results to results.csv")
-        result_df.to_csv("results.csv",index=False)
+        result_df = pd.read_json(json.dumps(results_arr), orient="records")
+        LOGGER.info("Saving results to results.csv")
+        result_df.to_csv("results.csv", index=False)
+
+
+def GeocodeWrapper(addresses: list, country: str, language: str, api_key: str):
+    """
+        GeocodeWrapper is a wrapper for multiprocessing
+        Returns:
+            geocode results
+        """
+    LOGGER.info("Starting Geocoder - country:%s lang:%s", country, language)
+    start_time = time.time()
+    with multiprocessing.pool.ThreadPool(POOL_SIZE) as executor:
+        args = [(address, country, language) for address in addresses]
+        all_results = []
+        results = executor.starmap(GeocoderService(api_key).geocode, args)
+        for response in results:
+            all_results.append(response)
+
+    LOGGER.info("Finished in %s seconds", (time.time() - start_time))
+    return all_results
+
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('key', help='your google api key')
-    parser.add_argument('file', help='path to .csv or .txt file containing list of new line separated addresses')
-    parser.add_argument('save', help='set to "csv" or "json"')
-    parser.add_argument('--country', help='set country restriction; see alpha-2 country codes https://en.wikipedia.org/wiki/ISO_3166-1')
-    parser.add_argument('--lang', help='optional language code in which to return results; see https://developers.google.com/maps/faq#languagesupport')
-    args = parser.parse_args()
+    PARSER = argparse.ArgumentParser()
+    PARSER.add_argument("key", help="your google api key")
+    PARSER.add_argument(
+        "file",
+        help="path to .csv or .txt file containing list of new line separated addresses",
+    )
+    PARSER.add_argument("save", help='set to "csv" or "json"')
+    PARSER.add_argument(
+        "--country",
+        help="set country restriction; see alpha-2 country codes https://en.wikipedia.org/wiki/ISO_3166-1",
+    )
+    PARSER.add_argument(
+        "--lang",
+        help="optional language code in which to return results; see https://developers.google.com/maps/faq#languagesupport",
+    )
+    ARGS = PARSER.parse_args()
 
-    results = list()
-    with open(args.file) as f:
-        addresses = [ line.strip() for line in f ]
-        for address in addresses:
-            print("Geocoding: {}".format(address))
-            output = Geocoder(args.key).geocode(args.country, args.lang, address)
-            results.append(output)
-            if len(results) % 100 == 0:
-                print ("Geocoded {} of {} addresses".format(len(results), len(addresses)))
-        print("Finished geocoding all addresses!")
+    with open(ARGS.file) as f:
+        ADDRESSES = [line.strip() for line in f]
+        GEOCODE_RESULTS = GeocodeWrapper(ADDRESSES, ARGS.country, ARGS.lang, ARGS.key)
 
-    if args.save == 'csv' : save(results, output='csv') 
-    if args.save == 'json' : save(results) 
+        if ARGS.save == "csv":
+            save(GEOCODE_RESULTS, output="csv")
+        elif ARGS.save == "json":
+            save(GEOCODE_RESULTS)
+        else:
+            LOGGER.error("Invalid save format. Must be csv or json.")
